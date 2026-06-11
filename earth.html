@@ -5,13 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;overflow:hidden;background:#383b38}
+html,body{width:100%;min-height:0;overflow:hidden;background:#383b38}
 body{font-family:'Segoe UI',system-ui,sans-serif}
 #wrap{
   position:relative;
   width:100%;
-  height:100svh;
-  min-height:300px;
+  height:clamp(420px,56vw,560px);
   background:#383b38;
   border-radius:12px;
   overflow:hidden;
@@ -19,7 +18,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif}
   touch-action:none;
   isolation:isolate;
 }
-@supports not (height:100svh){#wrap{height:100vh}}
 #c{
   position:absolute;
   inset:0;
@@ -63,27 +61,26 @@ body{font-family:'Segoe UI',system-ui,sans-serif}
 .slider-row input{accent-color:#f9cb9c;width:100%}
 .slider-row span{color:#f9cb9c;font-size:10px;text-align:right}
 @media (max-width:640px),(max-height:430px){
-  #wrap{border-radius:10px;min-height:300px}
-  #hud{top:10px;left:10px;right:88px}
+  #wrap{height:clamp(255px,66vw,330px);border-radius:10px}
+  #hud{top:10px;left:10px;right:10px}
   .hd{font-size:15px}.hd2{font-size:10px}.hd3{font-size:11px;margin-top:3px}
-  #tip{top:10px;right:10px;font-size:9px;line-height:1.55;color:rgba(249,203,156,0.20)}
-  #ctrl{padding:7px 10px 8px;background:linear-gradient(transparent,rgba(20,22,20,0.42) 8%,rgba(56,59,56,0.96) 54%)}
-  #tbar{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:'label slider today' 'date date loop';gap:4px 8px}
+  #tip{display:none}
+  #ctrl{padding:6px 10px 7px;background:linear-gradient(transparent,rgba(20,22,20,0.42) 8%,rgba(56,59,56,0.96) 54%)}
+  #tbar{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:'label slider today';gap:6px;align-items:center}
   #tbar label{grid-area:label;font-size:10px}
   #dslider{grid-area:slider;height:24px}
-  #dlabel{grid-area:date;text-align:left;min-width:0;font-size:10px;opacity:.92}
+  #dlabel{display:none}
   #btntoday{grid-area:today;font-size:10px;padding:3px 8px;border-radius:6px}
-  #btnloop{grid-area:loop;justify-self:end;font-size:10px;padding:3px 8px;border-radius:6px}
-  #leg{margin-top:4px;gap:7px;flex-wrap:nowrap;overflow:hidden;max-height:18px}
-  .lg{font-size:9px;gap:3px;opacity:.82}.lc{width:14px;height:4px}.layer-item{padding:4px 5px;margin:-4px -5px}.layer-check{width:10px;height:10px}
+  #btnloop{display:none}
+  #leg{display:none}
   .layer-panel{left:auto;right:0;min-width:190px;padding:10px 11px}
 }
 @media (max-width:390px){
-  #tip{display:none}
-  #hud{right:10px}
-  #leg{display:none}
-  #ctrl{padding-bottom:9px}
-  #btntoday,#btnloop{font-size:9px;padding:3px 7px}
+  #wrap{height:clamp(240px,66vw,300px)}
+  #hud{top:8px;left:9px;right:9px}
+  .hd{font-size:14px}.hd2{font-size:9px}.hd3{font-size:10px}
+  #ctrl{padding:5px 8px 6px}
+  #btntoday{font-size:9px;padding:3px 7px}
 }
 </style>
 </head>
@@ -168,25 +165,26 @@ function setCameraZ(z){camera.position.z=clamp(z,zoomMin,zoomMax);}
 function applyResponsiveLayout(resetCamera=false){
   const rect=wrap.getBoundingClientRect();
   const w=Math.max(240,Math.round(rect.width||window.innerWidth||800));
-  const h=Math.max(260,Math.round(rect.height||window.innerHeight||560));
+  const fallbackH=w<641?Math.round(clamp(w*0.66,240,330)):Math.round(clamp(w*0.56,420,560));
+  const h=Math.max(220,Math.round(rect.height||fallbackH));
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
   renderer.setSize(w,h,false);
   camera.aspect=w/h;
   camera.updateProjectionMatrix();
 
   const compact=(w<640||h<430);
-  const tiny=(w<390||h<340);
-  const topReserve=tiny?48:(compact?64:78);
-  const bottomReserve=tiny?54:(compact?86:92);
-  const sideReserve=compact?18:28;
-  const availableH=Math.max(h*0.36,h-topReserve-bottomReserve);
-  const availableW=Math.max(w*0.58,w-sideReserve*2);
+  const tiny=(w<390||h<300);
+  const topReserve=tiny?42:(compact?54:78);
+  const bottomReserve=tiny?34:(compact?40:92);
+  const sideReserve=compact?10:28;
+  const availableH=Math.max(120,h-topReserve-bottomReserve);
+  const availableW=Math.max(160,w-sideReserve*2);
   const radius=5.35;
-  const pad=compact?1.22:1.08;
+  const pad=compact?1.18:1.08;
   const fovRad=THREE.MathUtils.degToRad(camera.fov);
   const zByHeight=(radius*pad*h)/(Math.tan(fovRad/2)*availableH);
   const zByWidth=(radius*pad*w)/(Math.tan(fovRad/2)*camera.aspect*availableW);
-  responsiveFitZ=clamp(Math.max(zByHeight,zByWidth),compact?20:17,44);
+  responsiveFitZ=clamp(Math.max(zByHeight,zByWidth),compact?18:17,48);
   zoomMin=responsiveFitZ*0.62;
   zoomMax=responsiveFitZ*1.85;
   if(resetCamera||camera.position.z<zoomMin||camera.position.z>zoomMax){
