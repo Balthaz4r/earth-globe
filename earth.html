@@ -60,24 +60,42 @@ body{font-family:'Segoe UI',system-ui,sans-serif}
 .slider-row label{color:rgba(249,203,156,0.7);font-size:10px}
 .slider-row input{accent-color:#f9cb9c;width:100%}
 .slider-row span{color:#f9cb9c;font-size:10px;text-align:right}
+
 @media (max-width:640px),(max-height:430px){
-  #wrap{height:clamp(255px,66vw,330px);border-radius:10px}
-  #hud{top:10px;left:10px;right:10px}
+  #wrap{height:clamp(330px,72vw,380px);border-radius:10px}
+  #hud{top:9px;left:10px;right:10px}
   .hd{font-size:15px}.hd2{font-size:10px}.hd3{font-size:11px;margin-top:3px}
-  #tip{display:none}
-  #ctrl{padding:6px 10px 7px;background:linear-gradient(transparent,rgba(20,22,20,0.42) 8%,rgba(56,59,56,0.96) 54%)}
-  #tbar{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:'label slider today';gap:6px;align-items:center}
-  #tbar label{grid-area:label;font-size:10px}
-  #dslider{grid-area:slider;height:24px}
-  #dlabel{display:none}
-  #btntoday{grid-area:today;font-size:10px;padding:3px 8px;border-radius:6px}
-  #btnloop{display:none}
-  #leg{display:none}
-  .layer-panel{left:auto;right:0;min-width:190px;padding:10px 11px}
+  #tip{display:block;top:9px;right:10px;font-size:9px;line-height:1.55;color:rgba(249,203,156,0.22)}
+  #ctrl{padding:6px 8px 7px;background:linear-gradient(transparent,rgba(20,22,20,0.44) 7%,rgba(56,59,56,0.98) 50%)}
+  #tbar{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;grid-template-areas:'label slider date today' 'loop loop loop loop';gap:4px 6px;align-items:center}
+  #tbar label{grid-area:label;font-size:9.5px}
+  #dslider{grid-area:slider;height:22px;min-width:0}
+  #dlabel{grid-area:date;display:block;min-width:58px;font-size:10px;text-align:right}
+  #btntoday{grid-area:today;font-size:9.5px;padding:3px 7px;border-radius:6px}
+  #btnloop{grid-area:loop;display:block;justify-self:end;font-size:9.5px;padding:3px 7px;border-radius:6px;max-width:120px;overflow:hidden;text-overflow:ellipsis}
+  #leg{display:flex;gap:4px 7px;margin-top:5px;flex-wrap:wrap;align-items:center;max-height:none;overflow:visible}
+  .lg{font-size:8.8px;gap:3px;line-height:1;white-space:nowrap;color:rgba(249,203,156,0.58)}
+  .lc{width:13px;height:4px}
+  .layer-item{padding:2px 3px;margin:0;border-radius:5px}
+  .layer-check{width:10px;height:10px;border-radius:3px}
+  .layer-check:checked::after{font-size:8px;transform:translateY(-1px)}
+  .layer-panel{left:auto;right:0;bottom:115%;min-width:185px;padding:9px 10px}
+  .slider-row label{font-size:9px}.slider-row span{font-size:9px}
 }
 @media (max-width:390px){
-  #wrap{height:clamp(240px,66vw,300px)}
+  #wrap{height:clamp(320px,76vw,365px)}
   #hud{top:8px;left:9px;right:9px}
+  .hd{font-size:14px}.hd2{font-size:9px}.hd3{font-size:10px}
+  #tip{display:none}
+  #ctrl{padding:5px 7px 6px}
+  #tbar{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:'label slider today' 'date loop loop'}
+  #dlabel{justify-self:start;min-width:auto;font-size:9px}
+  #btnloop{justify-self:end;font-size:9px;max-width:112px}
+  .lg{font-size:8.2px;gap:2px}
+  .lc{width:11px;height:4px}
+  .layer-check{width:9px;height:9px}
+}
+#hud{top:8px;left:9px;right:9px}
   .hd{font-size:14px}.hd2{font-size:9px}.hd3{font-size:10px}
   #ctrl{padding:5px 8px 6px}
   #btntoday{font-size:9px;padding:3px 7px}
@@ -165,26 +183,26 @@ function setCameraZ(z){camera.position.z=clamp(z,zoomMin,zoomMax);}
 function applyResponsiveLayout(resetCamera=false){
   const rect=wrap.getBoundingClientRect();
   const w=Math.max(240,Math.round(rect.width||window.innerWidth||800));
-  const fallbackH=w<641?Math.round(clamp(w*0.66,240,330)):Math.round(clamp(w*0.56,420,560));
-  const h=Math.max(220,Math.round(rect.height||fallbackH));
+  const fallbackH=w<641?Math.round(clamp(w*0.72,320,380)):Math.round(clamp(w*0.56,420,560));
+  const h=Math.max(260,Math.round(rect.height||fallbackH));
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
   renderer.setSize(w,h,false);
   camera.aspect=w/h;
   camera.updateProjectionMatrix();
 
   const compact=(w<640||h<430);
-  const tiny=(w<390||h<300);
-  const topReserve=tiny?42:(compact?54:78);
-  const bottomReserve=tiny?34:(compact?40:92);
-  const sideReserve=compact?10:28;
-  const availableH=Math.max(120,h-topReserve-bottomReserve);
-  const availableW=Math.max(160,w-sideReserve*2);
+  const tiny=(w<390||h<340);
+  const topReserve=tiny?44:(compact?56:78);
+  const bottomReserve=tiny?118:(compact?112:92);
+  const sideReserve=compact?12:28;
+  const availableH=Math.max(105,h-topReserve-bottomReserve);
+  const availableW=Math.max(155,w-sideReserve*2);
   const radius=5.35;
-  const pad=compact?1.18:1.08;
+  const pad=compact?1.22:1.08;
   const fovRad=THREE.MathUtils.degToRad(camera.fov);
   const zByHeight=(radius*pad*h)/(Math.tan(fovRad/2)*availableH);
   const zByWidth=(radius*pad*w)/(Math.tan(fovRad/2)*camera.aspect*availableW);
-  responsiveFitZ=clamp(Math.max(zByHeight,zByWidth),compact?18:17,48);
+  responsiveFitZ=clamp(Math.max(zByHeight,zByWidth),compact?19:17,52);
   zoomMin=responsiveFitZ*0.62;
   zoomMax=responsiveFitZ*1.85;
   if(resetCamera||camera.position.z<zoomMin||camera.position.z>zoomMax){
